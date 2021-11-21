@@ -1,0 +1,58 @@
+
+//1)связный список - содержит в себе узлы которые включают в себя данные и указатель на слудующий
+//(или на следующий и предыдущий) элементы.
+//2)стек - контейнер упорядоченных элементов, раюотающий по принципу LIFO.
+//3)очередь - контейнер упорядоченных элементов, раюотающий по принципу FIFO.
+//4)вектор - умный динамический массив, cам себя удаляет.
+//5)дека - структура позволющая быстро добавлять и удалять элементы из начала и из конца.
+//
+//
+//Шаблоны необходимы для работы функции с различными типами аргументов, так как C++ требует чтобы все переменные
+//имели конкретный тип. Перед обьявлением шаблона необходимо написать template <typename *имя шаблона*>
+
+
+//структура
+#include <iostream>
+#include <deque>
+
+template <typename T>
+
+struct queue{
+
+    void push(T element){
+        container.push_back(element);
+    }
+    void pop(){
+        container.pop_front();
+    }
+    T front(){
+        return container.front();
+    }
+    T back(){
+        return  container.back();
+    }
+    unsigned size(){
+        return container.size();
+    }
+
+    T& operator[](const int i){
+        return container[i];
+    }
+    std::deque<T> container;
+};
+
+
+//это длля проверки//
+int main(){
+    queue<int> a;
+    for(auto i = 0;i<10;i++){
+        a.push(i);
+    }
+    a.pop();
+    std::cout << a.front() << std::endl;
+    std::cout << a.back() << std::endl;
+    std::cout << a.size() << std::endl;
+    a[0] = 100;
+    std::cout << a[0] << " " << a[2] <<  std::endl;
+    return 0;
+}
