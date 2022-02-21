@@ -1,0 +1,227 @@
+//(1)гомогенные контейнеры делятся на 3 типа:
+//1)на основе массива:
+//array
+//deque
+//vector
+//string
+//2)на основе узлов
+//list
+//forward_list
+//3)на осноые дерева
+//set
+//map
+
+
+
+
+
+
+#include <iostream>
+#include <math.h>
+#include <vector>
+
+
+struct Point{
+    float x;
+    float y;
+};
+
+
+
+
+class figure{
+public:
+    figure() = default;
+    virtual float check_perimeter() = 0;
+    virtual float check_area() = 0;
+    virtual  void information() = 0;
+};
+
+
+class ellips : public figure{
+
+
+public:
+    ellips(Point point, float b, float a) : b(b), a(a), point(point){}
+
+    float check_perimeter() override {
+        return((a + b) * 3.14);
+    }
+    float check_area() override {
+        return a*b*3.14;
+    }
+    void information() override{
+        std::cout << "Эта фигура является эллипсом" << std::endl;
+        std::cout << "Большая полуось: " << a << std::endl;
+        std::cout << "Меньшая полуось полуось: " << b << std::endl;
+        std::cout << "Центр в точке с координатами: x = " << point.x << " y = " << point.y << std::endl;
+        std::cout << "Площадь: " << check_area() << std::endl;
+        std::cout << "Периметр: " << check_perimeter() << std::endl;
+    }
+
+protected:
+    Point point;
+    float b;
+    float a;
+};
+
+
+class circle : public ellips{
+public:
+    circle(const Point &point, float a) : ellips(point, a, a) {}
+    void information(){
+        std::cout << "Эта фигура является кругом" << std::endl;
+        std::cout << "Радиус: " << a << std::endl;
+        std::cout << "Центр в точке с координатами: x = " << point.x << " y = " << point.y << std::endl;
+        std::cout << "Площадь: " << check_area() << std::endl;
+        std::cout << "Периметр: " << check_perimeter() << std::endl;
+    }
+};
+
+
+class polyhedron : public figure{
+public:
+
+    polyhedron(const std::vector<Point> &polygon, const Point &polygonStart) : polygon(polygon),
+                                                                               polygon_start(polygonStart) {};
+
+    float check_perimeter() override {
+        Point current_point = polygon_start;
+        float perimeter = 0;
+        for(auto i = 0;i<polygon.size();i++){
+            perimeter += std::sqrt((current_point.x- polygon[i].x)*(current_point.x- polygon[i].x) + (current_point.y- polygon[i].y)*(current_point.y - polygon[i].y));
+        }
+        return perimeter;
+    }
+    float check_area() override {
+        float area = 0;
+        Point const_point = polygon_start;
+        for(auto i = 0;i+1<polygon.size();i++){
+            Point point_1 = polygon[i];
+            Point point_2 = polygon[i+1];
+            area += 0.5*((point_1.x-const_point.x)*(point_2.y-const_point.y) - (point_2.x - const_point.x)*(point_1.y - const_point.y));
+        }
+        return std::abs(area);
+    }
+
+    void information() override{
+        std::cout << "Эта фигура является многоугольником" << std::endl;
+        std::cout << "Начало полигона в точке с координатами: x = " << polygon_start.x << " y = " << polygon_start.y << std::endl;
+        std::cout << "Площадь: " << check_area() << std::endl;
+        std::cout << "Периметр: " << check_perimeter() << std::endl;
+        std::cout << "Всего углов: " << polygon.size()+1<<std::endl;
+    }
+
+protected:
+    std::vector<Point> polygon;
+    Point polygon_start;
+};
+
+class triangle : public polyhedron{
+public:
+    triangle(Point point,float a, float b, float c) : polyhedron({point},point){
+        this->a = a;
+        this->b = b;
+        this->c = c;
+    }
+    float check_perimeter() override {
+        return a+b+c;
+    }
+    float check_area() override {
+        return std::sqrt(abs(check_perimeter()/2*(check_perimeter()/2-a)*(check_perimeter()/2-b)*(check_perimeter()/2-c)));
+    }
+    void information() override{
+        std::cout << "Эта фигура является треугольником" << std::endl;
+        std::cout << "Со сторнами : " << a << " " << b << " " << c << std::endl;
+        std::cout << "Центр тяжести в точке с координатами: x = " << polygon_start.x << " y = " << polygon_start.y << std::endl;
+        std::cout << "Площадь: " << check_area() << std::endl;
+        std::cout << "Периметр: " << check_perimeter() << std::endl;
+    }
+
+
+private:
+    float a,b,c;
+};
+
+class tetragon : public polyhedron{
+public:
+    tetragon(std::vector<Point> polygon, Point point) : polyhedron(polygon, point){
+        this->polygon = polygon;
+    }
+    void information() override{
+        std::cout << "Эта фигура является четырехугольником" << std::endl;
+        std::cout << "Начало полигона в точке с координатами: x = " << polygon_start.x << " " << " y = " << polygon_start.y << std::endl;
+        std::cout << "Площадь: " << check_area() << std::endl;
+        std::cout << "Периметр: " << check_perimeter() << std::endl;
+    }
+};
+
+class rectangle : public  tetragon{
+public:
+
+    rectangle(Point point, float a, float b) : tetragon({point},point){
+        this->a = a;
+        this->b = b;
+    };
+    float check_perimeter() override {
+        return (a+b)*2;
+    }
+    float check_area() override {
+        return (a*b);
+    }
+    void information() override{
+        std::cout << "Эта фигура является прямоугольником" << std::endl;
+        std::cout << "Длинна: " << a <<std::endl;
+        std::cout << "Ширина: " << b << std::endl;
+        std::cout << "Начало полигона в точке с координатами: x = " << polygon_start.x << " y = " << polygon_start.y << std::endl;
+        std::cout << "Площадь: " << check_area() << std::endl;
+        std::cout << "Периметр: " << check_perimeter() << std::endl;
+    }
+
+protected:
+    float a;
+    float b;
+};
+
+class square : public rectangle{
+public:
+    square(Point point, float a) : rectangle(point,a,a){
+    }
+    void information() override{
+        std::cout << "Эта фигура является квадратом" << std::endl;
+        std::cout << "Сторона: " << a <<std::endl;
+        std::cout << "Начало полигона в точке с координатами: x = " << polygon_start.x << " y = " << polygon_start.y << std::endl;
+        std::cout << "Площадь: " << check_area() << std::endl;
+        std::cout << "Периметр: " << check_perimeter() << std::endl;
+
+    }
+};
+
+
+
+
+
+
+
+int main() {
+    Point all_centers = {1,1};
+    std::vector<figure*> map;
+
+    std::vector<Point> p_polygon = {{1,2},{5,8},{6,10},{6,4}};
+
+    std::vector<Point> t_polygon = {{1,2},{5,8},{6,10}};
+
+
+    map.push_back(new ellips(all_centers,3.5,4.8));
+    map.push_back(new circle(all_centers,1));
+    map.push_back(new polyhedron(p_polygon,all_centers));
+    map.push_back(new triangle(all_centers,3,4,5));
+    map.push_back(new tetragon(t_polygon,all_centers));
+    map.push_back(new rectangle(all_centers,4,8));
+    map.push_back(new square(all_centers,2));
+
+    for(auto & element : map){
+        element->information();
+        std::cout << "**************************************************" << std::endl;
+    }
+}
