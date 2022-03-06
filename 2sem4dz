@@ -1,0 +1,219 @@
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <random>
+#include <ctime>
+#include <cstdlib>
+
+
+int func(){
+    return std::rand()%10;
+}
+
+
+std::ostream& operator<<(std::ostream& os,std::vector<int> vector){
+    for(auto & element: vector){
+        os << element << " ";
+    }
+    os  << std::endl;
+    return os;
+}
+
+int main(){
+
+    //1)создаем последовательность от 1 до 10
+    std::vector<int> vector(10);
+    std::iota(vector.begin(), vector.end(), 1);
+
+
+    for(auto & element: vector){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //2)добавляем 3 числа в конец последовательности
+    for(auto i = 0;i<3;i++){
+        int n;
+        std::cin >> n;
+        vector.push_back(n);
+    }
+
+
+    for(auto & element: vector){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //3)перемешиваем последовательность
+    time_t time = std::time(0);
+    std::shuffle(vector.begin(), vector.end(), std::default_random_engine(time));
+
+
+    for(auto & element: vector){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //4)удаляем повторения(unique + erase позволяет нам удалить только идущие подряд повторяющиеся элементы)
+    //облазил библиотеку алгоритмов:
+    //4.1)все производные unique так же работают с сортированным массивом
+    //4.2)реализовать нормальное удаление можно разве что с помощью алгоритмов наподобие find_end
+    //но с тем же успехом можно сделать это и без библиотеки алгоритм
+
+    std::sort(vector.begin(), vector.end());
+    auto excess = std::unique(vector.begin(), vector.end());
+    vector.erase(excess,vector.end());
+
+    for(auto & element: vector){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //5)посчитаем количество нечетных чисел
+    unsigned counter = 0;
+    for(auto & element: vector){
+        if(element%2) counter++;
+    }
+
+
+    std::cout << counter;
+    std::cout << std::endl;
+
+    //6)найдем максимальное и минамальное число
+    std::cout << *std::max_element(vector.begin(),vector.end()) << std::endl;
+    std::cout << *std::min_element(vector.begin(),vector.end()) << std::endl;
+
+    //7)найдем простое число
+    auto simple = (std::find_if(vector.begin(),vector.end(),[](int n){
+        if(n<2) return false;
+        if(n == 2) return true;
+        for (int i = 2; i <= sqrt(n); i++) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }));
+    if(simple == vector.end()) std::cout << "no simple";
+    else std::cout << *simple;
+    std::cout << std::endl;
+
+    //8)заменим числа их квадратами
+    std::transform(vector.begin(),vector.end(),vector.begin(),[](int a){
+        return a*a;
+    });
+
+    for(auto & element: vector){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //9)создадим вектор длинны 1 вектора и заполним случайными числами
+    std::srand(time);
+    std::vector<int> vector_2(vector.size());
+    std::generate(vector_2.begin(),vector_2.end(),func);
+
+    for(auto & element: vector_2){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //10)вычислим сумму последовательности
+    int sum = std::accumulate(vector_2.begin(),vector_2.end(),1);
+    std::cout << sum << std::endl;
+
+    //11)заменим первые n элементов на "10"
+    int n = 5;
+    std::replace_if(vector_2.begin(),vector_2.begin()+n,[](int a){return true;},10);
+
+    for(auto & element: vector_2){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //12)создадим vector3 как разность v1 и v2
+    std::vector<int> vector_3 = vector;
+    std::transform(vector.begin(),vector.end(),vector_2.begin(),vector_3.begin(),[](int a,int b){
+        return a-b;
+    });
+
+    for(auto & element: vector_3){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //13)заменим каждый элемент <0 нулем
+    std::replace_if(vector_3.begin(),vector_3.end(),[](int a){
+        return a < 0;
+    },0);
+
+    for(auto & element: vector_3){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //14)удалим все 0
+    vector_3.erase(std::remove(vector_3.begin(),vector_3.end(),0),vector_3.end());
+
+    for(auto & element: vector_3){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //15)развернем 3й вектор
+    std::reverse(vector_3.begin(),vector_3.end());
+
+    for(auto & element: vector_3){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //16)определим топ 3 наибольших элементов
+
+    std::partial_sort(vector_3.begin(),vector_3.begin()+3,vector_3.end(),[](int a,int b){return b < a;});
+
+    for(auto i = 0u;i<3;i++){
+        std::cout << vector_3[i] << ", ";
+    }
+    std::cout << std::endl;
+
+    //17)отсортируем 1 и 2 векторы
+
+    std::sort(vector.begin(),vector.end());
+    std::sort(vector_2.begin(),vector_2.end());
+
+    //18)создадим вектор 4 как слияние 1 и 2
+    std::vector<int> vector_4(vector.size()+vector_2.size());
+    std::merge(vector.begin(),vector.end(),vector_2.begin(),vector_2.end(),vector_4.begin());
+
+
+    for(auto & element: vector){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    for(auto & element: vector_2){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    for(auto & element: vector_4){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //19)найдем диапазон для упорядоченной вставки и заменим его на 0
+    auto range = std::equal_range(vector_4.begin(),vector_4.end(),10);
+
+    std::replace_if(range.first,range.second,[](int a){return true;},0);
+
+    for(auto & element: vector_4){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+
+    //20)выведем все векторы на экран используя перегруженный оператор вывода:
+    std::cout << vector << vector_2 << vector_3 << vector_4;
+
+}
